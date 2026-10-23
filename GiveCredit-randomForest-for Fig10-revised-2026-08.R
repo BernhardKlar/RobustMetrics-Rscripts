@@ -105,20 +105,16 @@ time.fit.full = system.time({
                 sampsize=c(10000), do.trace=FALSE, importance=TRUE, ntree=1000, keep.forest=TRUE)
 })["elapsed"]
 
-# Making the Confusion Matrix using all-tree in-sample predictions
-## change begin ## 
-#time.pred.train.full = system.time({
-#  cg.train = predict(RF.train, newdata=training[,-c(1,6,11)])
-#})["elapsed"]
-#train.pred = factor( ifelse(cg.train >= 0.5, 1, 0))
-
+# OOB training predictions are computed during model fitting.
+# NA means there is no separately timed training-prediction pass.
+time.pred.train.full = NA_real_
 train.pred = factor( ifelse(RF.train$predicted >= 0.5, 1, 0))
-## change end ## 
 cm.train = confusionMatrix(train.pred, as.factor(training$SeriousDlqin2yrs))
 cm.train$table
 ###############################################################################
 # computation of empirical optimal threshold for regression function
-cg1 = cg.train
+cg1 = RF.train$predicted
+stopifnot(length(cg1) == nrow(training), all(is.finite(cg1)))
 yf = factor(training$SeriousDlqin2yrs, levels = c(1,0))
 del.vec = seq(0.001,0.999,0.001); nd = length(del.vec)
 M.res = Fgen.res = MCCgen.res = matrix(0, nrow=nd, ncol=6)
@@ -230,12 +226,10 @@ time.fit.sub = system.time({
 
 ###############################################################################
 # computation of empirical optimal threshold for regression function
-## change begin ## 
-#time.pred.train.sub = system.time({
-#  cg1 = predict(RF.train1, newdata=training1[,-c(1,6,11)])
-#})["elapsed"]
+# OOB prediction costs are included in the subset model-fitting time.
+time.pred.train.sub = NA_real_
 cg1 = RF.train1$predicted
-## change end ## 
+stopifnot(length(cg1) == nrow(training1), all(is.finite(cg1)))
 yf = factor(training1$SeriousDlqin2yrs, levels = c(1,0))
 del.vec = seq(0.001,0.999,0.001); nd = length(del.vec)
 M.res = Fgen.res = MCCgen.res = matrix(0, nrow=nd, ncol=6)
@@ -556,6 +550,7 @@ print(xtable(tab3.df, digits=3), include.rownames=FALSE, include.colnames=TRUE,
 
 ####################################################################################
 # Computational timings (elapsed seconds)
+# Training prediction is NA because OOB predictions are included in fitting.
 timings = data.frame(
   setting = c("full data", "strongly imbalanced subset"),
   model = "regression forest",
