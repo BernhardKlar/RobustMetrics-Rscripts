@@ -94,7 +94,7 @@ Sigma0=matrix(c(2,0.5,0.5,1), ncol=2); Sigma1=matrix(c(1,-0.5,-0.5,2), ncol=2)
 mu0=c(0,0); mu1=c(2.5,2.5)
 #
 curve(root.v(x, mu0, mu1, Sigma0, Sigma1, metric="JAC"), from=0.01, to=0.99, ylim=c(0,10), lwd=3, lty=1, col=1,
-      xlab=expression(pi), ylab=expression(delta^"*"), main="Szenario 1")
+      xlab=expression(pi), ylab=expression(delta^"*"), main="Scenario 1")
 curve(root.v(x, mu0, mu1, Sigma0, Sigma1, metric="MCC"), add=TRUE, lwd=3, lty=2, col=2, n=500)
 curve(root.v(x, mu0, mu1, Sigma0, Sigma1, metric="Yule"), add=TRUE, lwd=3, lty=3, col=3, n=500)
 abline(h=1, lwd=3, lty=4, col=8)  # balanced accuracy
